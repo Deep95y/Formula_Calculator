@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Calculator</title>
+    <style>
+        #formula {
+            width: 300px;
+            padding: 10px;
+            background-color: aliceblue;
+        }
+        button {
+            padding: 10px;
+            margin: auto;
+            background-color: lightskyblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Formula Calculator</h1>
+    <input type="text" id="formula" placeholder="Enter formula (e.g., 2+6*3)">
+    <button onclick="calculate()">Calculate</button>
+    <p id="result"></p>
+
+    <script>
+        function calculate() {
+            const formulaInput = document.getElementById('formula').value;
+            let result;
+
+            try {
+                result = evaluate(formulaInput);
+            } catch (error) {
+                result = 'Error: ' + error.message;
+            }
+
+            document.getElementById('result').innerText = 'Result: ' + result;
+        }
+
+        function evaluate(expression) {
+            const operators = {
+                '+': 1,
+                '-': 1,
+                '*': 2,
+                '/': 2
+            };
+            const precedence = (op) => operators[op] || 0;
+            const isOperator = (char) => Object.keys(operators).includes(char);
+
+            const outputQueue = [];
+            const operatorStack = [];
+
+            const tokens = expression.match(/\d+(\.\d+)?|[-+*/]/g);
+
+            for (const token of tokens) {
+                if (!isNaN(token)) {
+                    outputQueue.push(parseFloat(token));
+                } else if (isOperator(token)) {
+                    while (operatorStack.length && precedence(operatorStack[operatorStack.length - 1]) >= precedence(token)) {
+                        outputQueue.push(operatorStack.pop());
+                    }
+                    operatorStack.push(token);
+                }
+            }
+
+            while (operatorStack.length) {
+                outputQueue.push(operatorStack.pop());
+            }
+
+            const stack = [];
+            for (const token of outputQueue) {
+                if (typeof token === 'number') {
+                    stack.push(token);
+                } else if (isOperator(token)) {
+                    const b = stack.pop();
+                    const a = stack.pop();
+                    switch (token) {
+                        case '+': stack.push(a + b); break;
+                        case '-': stack.push(a - b); break;
+                        case '*': stack.push(a * b); break;
+                        case '/': stack.push(a / b); break;
+                    }
+                }
+            }
+
+            return stack.pop();
+        }
+    </script>
+</body>
+</html>
+ 1e5rc
